@@ -7,6 +7,7 @@ namespace JobService.Service.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            Serilog.Log.Logger.Information("Add table JobAttemptSaga");
             migrationBuilder.CreateTable(
                 name: "JobAttemptSaga",
                 columns: table => new

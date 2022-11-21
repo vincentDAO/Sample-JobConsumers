@@ -38,7 +38,7 @@ namespace JobService.Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
+            Serilog.Log.Logger.Information(Configuration.GetConnectionString("JobService"));
             services.AddDbContext<JobServiceSagaDbContext>(builder =>
                 builder.UseNpgsql(Configuration.GetConnectionString("JobService"), m =>
                 {
@@ -105,8 +105,9 @@ namespace JobService.Service
             services.AddOpenApiDocument(cfg => cfg.PostProcess = d => d.Info.Title = "Convert Video Service");
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, JobServiceSagaDbContext context)
         {
+            context.Database.Migrate();
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
 

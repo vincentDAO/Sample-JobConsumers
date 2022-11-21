@@ -23,8 +23,7 @@
             var variance = TimeSpan.FromMilliseconds(rng.Next(8399, 28377));
 
             await Task.Delay(variance);
-
-            await context.Publish<VideoConverted>(context.Job);
+            // await context.Publish<VideoConverted>(context.Job);
         }
     }
 }

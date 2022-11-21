@@ -16,6 +16,8 @@ services:
     build:
       context: ./src
       dockerfile: Dockerfile.service
+    environment:
+      - "ConnectionStrings__JobService=host=postgres;user id=postgres;password=Password12!;database=jobservice;"
     ports:
      - "5000:80"
      - "5001:81"
