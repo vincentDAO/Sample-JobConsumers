@@ -13,6 +13,8 @@ services:
       - 5432:5432
   service:
     image: jobservice/service
+    environment:
+      - "ConnectionStrings__JobService=host=postgres;user id=postgres;password=Password12!;database=jobservice;"
     build:
       context: ./src
       dockerfile: Dockerfile.service

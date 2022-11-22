@@ -54,32 +54,45 @@ namespace JobService.Service
             {
                 x.AddDelayedMessageScheduler();
 
-                x.AddConsumer<ConvertVideoJobConsumer>(typeof(ConvertVideoJobConsumerDefinition));
+                //x.AddConsumer<ConvertVideoJobConsumer>(typeof(ConvertVideoJobConsumerDefinition));
+                x.AddConsumer<ConvertVideoJobConsumer>();
 
                 x.AddConsumer<VideoConvertedConsumer>();
 
                 x.AddSagaRepository<JobSaga>()
-                    .EntityFrameworkRepository(r =>
+                    // .EntityFrameworkRepository(r =>
+                    // {
+                    //     r.ExistingDbContext<JobServiceSagaDbContext>();
+                    //     r.LockStatementProvider = new PostgresLockStatementProvider();
+                    // });
+                    .RedisRepository(r =>
                     {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
+                        r.DatabaseConfiguration("redis");
                     });
                 x.AddSagaRepository<JobTypeSaga>()
-                    .EntityFrameworkRepository(r =>
+                    // .EntityFrameworkRepository(r =>
+                    // {
+                    //     r.ExistingDbContext<JobServiceSagaDbContext>();
+                    //     r.LockStatementProvider = new PostgresLockStatementProvider();
+                    // });
+                    .RedisRepository(r =>
                     {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
+                        r.DatabaseConfiguration("redis");
                     });
                 x.AddSagaRepository<JobAttemptSaga>()
-                    .EntityFrameworkRepository(r =>
+                    // .EntityFrameworkRepository(r =>
+                    // {
+                    //     r.ExistingDbContext<JobServiceSagaDbContext>();
+                    //     r.LockStatementProvider = new PostgresLockStatementProvider();
+                    // });
+                    .RedisRepository(r =>
                     {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
+                        r.DatabaseConfiguration("redis");
                     });
 
                 x.AddRequestClient<ConvertVideo>();
 
-                x.SetKebabCaseEndpointNameFormatter();
+                //x.SetKebabCaseEndpointNameFormatter();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -88,10 +101,10 @@ namespace JobService.Service
 
                     cfg.UseDelayedMessageScheduler();
 
-                    var options = new ServiceInstanceOptions()
-                        .SetEndpointNameFormatter(context.GetService<IEndpointNameFormatter>() ?? KebabCaseEndpointNameFormatter.Instance);
-
-                    cfg.ServiceInstance(options, instance =>
+                    //var options = new ServiceInstanceOptions()
+                       // .SetEndpointNameFormatter(context.GetService<IEndpointNameFormatter>() ?? KebabCaseEndpointNameFormatter.Instance);
+                    // cfg.ServiceInstance(options, instance =>
+                    cfg.ServiceInstance(instance =>
                     {
                         instance.ConfigureJobServiceEndpoints(js =>
                         {
@@ -126,13 +139,13 @@ namespace JobService.Service
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
-                {
-                    Predicate = check => check.Tags.Contains("ready"),
-                    ResponseWriter = HealthCheckResponseWriter
-                });
+                // endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+                // {
+                //     Predicate = check => check.Tags.Contains("ready"),
+                //     ResponseWriter = HealthCheckResponseWriter
+                // });
 
-                endpoints.MapHealthChecks("/health/live", new HealthCheckOptions {ResponseWriter = HealthCheckResponseWriter});
+                // endpoints.MapHealthChecks("/health/live", new HealthCheckOptions {ResponseWriter = HealthCheckResponseWriter});
 
                 endpoints.MapControllers();
             });
