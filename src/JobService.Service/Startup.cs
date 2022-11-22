@@ -8,6 +8,9 @@ namespace JobService.Service
     using JobService.Components;
     using MassTransit;
     using MassTransit.EntityFrameworkCoreIntegration;
+    using MassTransit.Definition;
+    using MassTransit.JobService.Components.StateMachines;
+    using MassTransit.JobService.Configuration;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
     using Microsoft.AspNetCore.Hosting;
@@ -39,38 +42,51 @@ namespace JobService.Service
         {
             services.AddControllers();
             Serilog.Log.Logger.Information(Configuration.GetConnectionString("JobService"));
-            services.AddDbContext<JobServiceSagaDbContext>(builder =>
-                builder.UseNpgsql(Configuration.GetConnectionString("JobService"), m =>
-                {
-                    m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                    m.MigrationsHistoryTable($"__{nameof(JobServiceSagaDbContext)}");
-                }));
+            // services.AddDbContext<JobServiceSagaDbContext>(builder =>
+            //     builder.UseNpgsql(Configuration.GetConnectionString("JobService"), m =>
+            //     {
+            //         m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+            //         m.MigrationsHistoryTable($"__{nameof(JobServiceSagaDbContext)}");
+            //     }));
 
             services.AddMassTransit(x =>
             {
                 x.AddDelayedMessageScheduler();
 
                 x.AddConsumer<ConvertVideoJobConsumer>(typeof(ConvertVideoJobConsumerDefinition));
+                //x.AddConsumer<ConvertVideoJobConsumer>();
 
                 x.AddConsumer<VideoConvertedConsumer>();
 
                 x.AddSagaRepository<JobSaga>()
-                    .EntityFrameworkRepository(r =>
+                    // .EntityFrameworkRepository(r =>
+                    // {
+                    //     r.ExistingDbContext<JobServiceSagaDbContext>();
+                    //     r.LockStatementProvider = new PostgresLockStatementProvider();
+                    // });
+                    .RedisRepository(r =>
                     {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
+                        r.DatabaseConfiguration("redis");
                     });
                 x.AddSagaRepository<JobTypeSaga>()
-                    .EntityFrameworkRepository(r =>
+                    // .EntityFrameworkRepository(r =>
+                    // {
+                    //     r.ExistingDbContext<JobServiceSagaDbContext>();
+                    //     r.LockStatementProvider = new PostgresLockStatementProvider();
+                    // });
+                     .RedisRepository(r =>
                     {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
+                        r.DatabaseConfiguration("redis");
                     });
                 x.AddSagaRepository<JobAttemptSaga>()
-                    .EntityFrameworkRepository(r =>
+                    // .EntityFrameworkRepository(r =>
+                    // {
+                    //     r.ExistingDbContext<JobServiceSagaDbContext>();
+                    //     r.LockStatementProvider = new PostgresLockStatementProvider();
+                    // });
+ .RedisRepository(r =>
                     {
-                        r.ExistingDbContext<JobServiceSagaDbContext>();
-                        r.LockStatementProvider = new PostgresLockStatementProvider();
+                        r.DatabaseConfiguration("redis");
                     });
 
                 x.AddRequestClient<ConvertVideo>();
@@ -105,9 +121,9 @@ namespace JobService.Service
             services.AddOpenApiDocument(cfg => cfg.PostProcess = d => d.Info.Title = "Convert Video Service");
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, JobServiceSagaDbContext context)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env) //, JobServiceSagaDbContext context
         {
-            context.Database.Migrate();
+            //context.Database.Migrate();
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
 
@@ -120,13 +136,13 @@ namespace JobService.Service
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
-                {
-                    Predicate = check => check.Tags.Contains("ready"),
-                    ResponseWriter = HealthCheckResponseWriter
-                });
+                // endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+                // {
+                //     Predicate = check => check.Tags.Contains("ready"),
+                //     ResponseWriter = HealthCheckResponseWriter
+                // });
 
-                endpoints.MapHealthChecks("/health/live", new HealthCheckOptions {ResponseWriter = HealthCheckResponseWriter});
+                // endpoints.MapHealthChecks("/health/live", new HealthCheckOptions {ResponseWriter = HealthCheckResponseWriter});
 
                 endpoints.MapControllers();
             });

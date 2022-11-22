@@ -1,8 +1,11 @@
 namespace JobService.Components
 {
     using System;
+    using GreenPipes;
     using MassTransit;
-
+    using MassTransit.ConsumeConfigurators;
+    using MassTransit.Definition;
+    using MassTransit.JobService;
 
     public class ConvertVideoJobConsumerDefinition :
         ConsumerDefinition<ConvertVideoJobConsumer>

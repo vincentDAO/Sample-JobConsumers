@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using MassTransit;
     using Microsoft.Extensions.Logging;
+    using MassTransit.JobService;
 
 
     public class ConvertVideoJobConsumer :
